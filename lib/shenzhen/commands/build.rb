@@ -16,6 +16,7 @@ command :build do |c|
   c.option '-m', '--embed PROVISION', 'Sign .ipa file with .mobileprovision'
   c.option '-i', '--identity IDENTITY', 'Identity to be used along with --embed'
   c.option '--sdk SDK', 'use SDK as the name or path of the base SDK when building the project'
+  c.option '--GCC_PREPROCESSOR_DEFINITIONS GCC_PREPROCESSOR_DEFINITIONS', 'Flags to pass in with -GCC_PREPROCESSOR_DEFINITIONS'
 
   c.action do |args, options|
     validate_xcode_version!
@@ -30,6 +31,7 @@ command :build do |c|
     @configuration = options.configuration
     @xcconfig = options.xcconfig
     @destination = options.destination || Dir.pwd
+    @GCC_PREPROCESSOR_DEFINITIONS = options.GCC_PREPROCESSOR_DEFINITIONS
     FileUtils.mkdir_p(@destination) unless File.directory?(@destination)
 
     determine_workspace_or_project! unless @workspace || @project
@@ -51,6 +53,7 @@ command :build do |c|
     flags << %{-scheme "#{@scheme}"} if @scheme
     flags << %{-configuration "#{@configuration}"} if @configuration
     flags << %{-xcconfig "#{@xcconfig}"} if @xcconfig
+    flags << %{GCC_PREPROCESSOR_DEFINITIONS="#{@GCC_PREPROCESSOR_DEFINITIONS}"} if @GCC_PREPROCESSOR_DEFINITIONS
 
     @target, @xcodebuild_settings = Shenzhen::XcodeBuild.settings(*flags).detect{|target, settings| settings['WRAPPER_EXTENSION'] == "app"}
     say_error "App settings could not be found." and abort unless @xcodebuild_settings
